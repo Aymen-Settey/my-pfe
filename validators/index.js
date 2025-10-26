@@ -160,6 +160,114 @@ const taskIdSchema = z.object({
     .regex(/^[0-9a-fA-F]{24}$/, { message: "Format d'ID de tâche invalide" }),
 });
 
+// Journal validation schemas
+const journalSchema = z.object({
+  date: z.string().datetime({ message: "Date invalide" }),
+  activities: z.string().optional(),
+  skills: z.string().optional(),
+  difficulties: z.string().optional(),
+  solutions: z.string().optional(),
+});
+
+const journalUpdateSchema = z.object({
+  date: z.string().datetime({ message: "Date invalide" }).optional(),
+  activities: z.string().optional(),
+  skills: z.string().optional(),
+  difficulties: z.string().optional(),
+  solutions: z.string().optional(),
+});
+
+// Meeting validation schemas
+const meetingSchema = z.object({
+  title: z.string().min(1, { message: "Le titre est requis" }),
+  date: z.string().datetime({ message: "Date invalide" }),
+  duration: z
+    .number()
+    .min(1, { message: "La durée doit être positive" })
+    .optional(),
+  participants: z
+    .array(
+      z
+        .string()
+        .regex(/^[0-9a-fA-F]{24}$/, { message: "ID de participant invalide" })
+    )
+    .optional(),
+  link: z.string().url({ message: "Lien invalide" }).optional(),
+  status: z
+    .enum(["planned", "completed"], {
+      message: "Le statut doit être: planned ou completed",
+    })
+    .optional(),
+  description: z.string().optional(),
+});
+
+const meetingUpdateSchema = z.object({
+  title: z.string().min(1, { message: "Le titre est requis" }).optional(),
+  date: z.string().datetime({ message: "Date invalide" }).optional(),
+  duration: z
+    .number()
+    .min(1, { message: "La durée doit être positive" })
+    .optional(),
+  participants: z
+    .array(
+      z
+        .string()
+        .regex(/^[0-9a-fA-F]{24}$/, { message: "ID de participant invalide" })
+    )
+    .optional(),
+  link: z.string().url({ message: "Lien invalide" }).optional(),
+  status: z
+    .enum(["planned", "completed"], {
+      message: "Le statut doit être: planned ou completed",
+    })
+    .optional(),
+  description: z.string().optional(),
+});
+
+const meetingValidationSchema = z.object({
+  status: z.enum(["planned", "completed"], {
+    message: "Le statut doit être: planned ou completed",
+  }),
+});
+
+// Report validation schemas
+const reportSchema = z.object({
+  version: z.string().min(1, { message: "La version est requise" }),
+  date: z.string().datetime({ message: "Date invalide" }),
+  notes: z.string().optional(),
+  file_url: z.string().url({ message: "URL de fichier invalide" }),
+  status: z
+    .enum(["draft", "submitted", "approved", "rejected"], {
+      message: "Le statut doit être: draft, submitted, approved ou rejected",
+    })
+    .optional(),
+});
+
+const reportUpdateSchema = z.object({
+  version: z.string().min(1, { message: "La version est requise" }).optional(),
+  date: z.string().datetime({ message: "Date invalide" }).optional(),
+  notes: z.string().optional(),
+  file_url: z.string().url({ message: "URL de fichier invalide" }).optional(),
+  status: z
+    .enum(["draft", "submitted", "approved", "rejected"], {
+      message: "Le statut doit être: draft, submitted, approved ou rejected",
+    })
+    .optional(),
+});
+
+// Additional ID validation schemas
+const meetingIdSchema = z.object({
+  meetingId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, { message: "Format d'ID de réunion invalide" }),
+});
+
+const reportIdSchema = z.object({
+  reportId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, { message: "Format d'ID de rapport invalide" }),
+});
+
 // Validation middleware functions
 const validateUser = (req, res, next) => {
   try {
@@ -405,6 +513,152 @@ const validateTaskId = (req, res, next) => {
   }
 };
 
+const validateJournal = (req, res, next) => {
+  try {
+    journalSchema.parse(req.body);
+    next();
+  } catch (error) {
+    const err = new Error("Validation failed");
+    err.status = 400;
+    err.details = error.errors.map((e) => ({
+      field: e.path.join("."),
+      message: e.message,
+      code: "VALIDATION_ERROR",
+    }));
+    next(err);
+  }
+};
+
+const validateJournalUpdate = (req, res, next) => {
+  try {
+    journalUpdateSchema.parse(req.body);
+    next();
+  } catch (error) {
+    const err = new Error("Validation failed");
+    err.status = 400;
+    err.details = error.errors.map((e) => ({
+      field: e.path.join("."),
+      message: e.message,
+      code: "VALIDATION_ERROR",
+    }));
+    next(err);
+  }
+};
+
+const validateMeeting = (req, res, next) => {
+  try {
+    meetingSchema.parse(req.body);
+    next();
+  } catch (error) {
+    const err = new Error("Validation failed");
+    err.status = 400;
+    err.details = error.errors.map((e) => ({
+      field: e.path.join("."),
+      message: e.message,
+      code: "VALIDATION_ERROR",
+    }));
+    next(err);
+  }
+};
+
+const validateMeetingUpdate = (req, res, next) => {
+  try {
+    meetingUpdateSchema.parse(req.body);
+    next();
+  } catch (error) {
+    const err = new Error("Validation failed");
+    err.status = 400;
+    err.details = error.errors.map((e) => ({
+      field: e.path.join("."),
+      message: e.message,
+      code: "VALIDATION_ERROR",
+    }));
+    next(err);
+  }
+};
+
+const validateMeetingValidation = (req, res, next) => {
+  try {
+    meetingValidationSchema.parse(req.body);
+    next();
+  } catch (error) {
+    const err = new Error("Validation failed");
+    err.status = 400;
+    err.details = error.errors.map((e) => ({
+      field: e.path.join("."),
+      message: e.message,
+      code: "VALIDATION_ERROR",
+    }));
+    next(err);
+  }
+};
+
+const validateReport = (req, res, next) => {
+  try {
+    reportSchema.parse(req.body);
+    next();
+  } catch (error) {
+    const err = new Error("Validation failed");
+    err.status = 400;
+    err.details = error.errors.map((e) => ({
+      field: e.path.join("."),
+      message: e.message,
+      code: "VALIDATION_ERROR",
+    }));
+    next(err);
+  }
+};
+
+const validateReportUpdate = (req, res, next) => {
+  try {
+    reportUpdateSchema.parse(req.body);
+    next();
+  } catch (error) {
+    const err = new Error("Validation failed");
+    err.status = 400;
+    err.details = error.errors.map((e) => ({
+      field: e.path.join("."),
+      message: e.message,
+      code: "VALIDATION_ERROR",
+    }));
+    next(err);
+  }
+};
+
+const validateMeetingId = (req, res, next) => {
+  try {
+    meetingIdSchema.parse({ meetingId: req.params.meetingId });
+    next();
+  } catch (error) {
+    const err = new Error("Invalid Meeting ID format");
+    err.status = 400;
+    err.details = {
+      field: "meetingId",
+      value: req.params.meetingId,
+      message: error.errors[0]?.message || "Format d'ID de réunion invalide",
+      code: "INVALID_MEETING_ID",
+    };
+    next(err);
+  }
+};
+
+const validateReportId = (req, res, next) => {
+  try {
+    reportIdSchema.parse({ reportId: req.params.reportId });
+    next();
+  } catch (error) {
+    const err = new Error("Invalid Report ID format");
+    err.status = 400;
+    err.details = {
+      field: "reportId",
+      value: req.params.reportId,
+      message: error.errors[0]?.message || "Format d'ID de rapport invalide",
+      code: "INVALID_REPORT_ID",
+    };
+    next(err);
+  }
+};
+
 module.exports = {
   validateUser,
   validateLogin,
@@ -417,8 +671,17 @@ module.exports = {
   validateTask,
   validateTaskUpdate,
   validateTaskStatusUpdate,
+  validateJournal,
+  validateJournalUpdate,
+  validateMeeting,
+  validateMeetingUpdate,
+  validateMeetingValidation,
+  validateReport,
+  validateReportUpdate,
   validateId,
   validateSprintId,
   validateUserStoryId,
   validateTaskId,
+  validateMeetingId,
+  validateReportId,
 };

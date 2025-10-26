@@ -1,6 +1,6 @@
 const Journal = require("../models/Journal");
 
-exports.createJournalEntry = async (req, res) => {
+exports.createJournalEntry = async (req, res, next) => {
   try {
     const { date, activities, skills, difficulties, solutions } = req.body;
     const { projectId } = req.params;
@@ -15,27 +15,83 @@ exports.createJournalEntry = async (req, res) => {
     });
 
     await journal.save();
-    res.status(201).json(journal);
+    res.status(201).json({
+      success: true,
+      message: "Journal entry created successfully",
+      model: journal,
+    });
   } catch (err) {
-    res
-      .status(400)
-      .json({ message: "Error creating journal entry", error: err.message });
+    next(err);
   }
 };
 
-exports.getJournalEntry = async (req, res) => {
+exports.getJournalEntry = async (req, res, next) => {
   try {
     const { projectId } = req.params;
     const journal = await Journal.find({ project_id: projectId });
 
     if (!journal || journal.length === 0) {
-      return res.status(404).json({ message: "Journal not found" });
+      const err = new Error("Journal not found");
+      err.status = 404;
+      throw err;
     }
 
-    res.status(200).json(journal);
+    res.status(200).json({
+      success: true,
+      message: "Journal entries fetched successfully",
+      model: journal,
+    });
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error fetching journal", error: err.message });
+    next(err);
+  }
+};
+
+exports.updateJournalEntry = async (req, res, next) => {
+  try {
+    const { projectId, journalId } = req.params;
+    const { date, activities, skills, difficulties, solutions } = req.body;
+
+    const journal = await Journal.findOneAndUpdate(
+      { _id: journalId, project_id: projectId },
+      { date, activities, skills, difficulties, solutions },
+      { new: true, runValidators: true }
+    );
+
+    if (!journal) {
+      const err = new Error("Journal entry not found");
+      err.status = 404;
+      throw err;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Journal entry updated successfully",
+      model: journal,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteJournalEntry = async (req, res, next) => {
+  try {
+    const { projectId, journalId } = req.params;
+    const result = await Journal.deleteOne({
+      _id: journalId,
+      project_id: projectId,
+    });
+
+    if (result.deletedCount === 0) {
+      const err = new Error("Journal entry not found");
+      err.status = 404;
+      throw err;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Journal entry deleted successfully",
+    });
+  } catch (err) {
+    next(err);
   }
 };
