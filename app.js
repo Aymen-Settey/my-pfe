@@ -25,7 +25,7 @@ app.get("/", (req, res) => {
 });
 
 // 404 handler for unmatched routes
-app.all("*", (req, res, next) => {
+app.use((req, res, next) => {
   const err = new Error(`Route ${req.originalUrl} not found`);
   err.status = 404;
   next(err);
