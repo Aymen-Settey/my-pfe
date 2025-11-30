@@ -1,6 +1,6 @@
 # Équipe D - Validations & Réunions
 
-**Membres de l'équipe :** [Vos noms]  
+**Membres de l'équipe :** Aymen Settey & Khairi Hammami
 **Projet :** Système de Gestion PFE  
 **Durée :** 30 novembre 2025 - 6 décembre 2025
 
