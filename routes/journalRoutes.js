@@ -6,11 +6,11 @@ const {
 } = require("../controllers/journalController");
 const { protect, authorizeRoles } = require("../middlewares/authMiddleware");
 
-router.post("/", protect, authorizeRoles("student"), createJournalEntry);
+router.post("/", protect, authorizeRoles("ETUDIANT"), createJournalEntry);
 router.get(
   "/",
   protect,
-  authorizeRoles("student", "supervisor_company", "supervisor_academic"),
+  authorizeRoles("ETUDIANT", "ENCADRANT_ENTREPRISE", "ENCADRANT_UNIVERSITAIRE"),
   getJournalEntry
 );
 

@@ -3,7 +3,7 @@ const generateToken = require("../utils/generateToken");
 
 exports.signup = async (req, res, next) => {
   try {
-    const { email, password, user_name, role, phone } = req.body;
+    const { email, motDePasse, nom, role } = req.body;
 
     // Check if email exists
     const existingUser = await User.findOne({ email });
@@ -14,7 +14,7 @@ exports.signup = async (req, res, next) => {
     }
 
     // Create user
-    const user = new User({ email, password, user_name, role, phone });
+    const user = new User({ email, motDePasse, nom, role });
     await user.save();
 
     res.status(201).json({
@@ -30,7 +30,7 @@ exports.signup = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, motDePasse } = req.body;
 
     // Find user
     const user = await User.findOne({ email });
@@ -41,7 +41,7 @@ exports.login = async (req, res, next) => {
     }
 
     // Check password
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await user.comparePassword(motDePasse);
     if (!isMatch) {
       const err = new Error("Invalid email or password");
       err.status = 401;

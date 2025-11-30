@@ -19,37 +19,32 @@ const {
 router.use(protect);
 
 // Create user story (only students can create user stories)
-router.post("/", authorizeRoles("student"), validateUserStory, createUserStory);
+router.post(
+  "/",
+  authorizeRoles("ETUDIANT"),
+  validateUserStory,
+  createUserStory
+);
 
-// Get all user stories (accessible by students, supervisors, and admins)
+// Get all user stories (accessible by students, supervisors)
 router.get(
   "/",
-  authorizeRoles(
-    "student",
-    "academic_supervisor",
-    "company_supervisor",
-    "admin"
-  ),
+  authorizeRoles("ETUDIANT", "ENCADRANT_UNIVERSITAIRE", "ENCADRANT_ENTREPRISE"),
   getUserStories
 );
 
-// Get user story by ID (accessible by students, supervisors, and admins)
+// Get user story by ID (accessible by students, supervisors)
 router.get(
   "/:userStoryId",
   validateUserStoryId,
-  authorizeRoles(
-    "student",
-    "academic_supervisor",
-    "company_supervisor",
-    "admin"
-  ),
+  authorizeRoles("ETUDIANT", "ENCADRANT_UNIVERSITAIRE", "ENCADRANT_ENTREPRISE"),
   getUserStoryById
 );
 
 // Update user story (only students can update user stories)
 router.put(
   "/:userStoryId",
-  authorizeRoles("student"),
+  authorizeRoles("ETUDIANT"),
   validateUserStoryId,
   validateUserStoryUpdate,
   updateUserStory
@@ -58,7 +53,7 @@ router.put(
 // Delete user story (only students can delete user stories)
 router.delete(
   "/:userStoryId",
-  authorizeRoles("student"),
+  authorizeRoles("ETUDIANT"),
   validateUserStoryId,
   deleteUserStory
 );

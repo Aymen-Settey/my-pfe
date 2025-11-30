@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
-    user_name: {
+    nom: {
       type: String,
       required: true,
       trim: true,
@@ -16,20 +16,19 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
     },
-    password: {
+    motDePasse: {
       type: String,
       required: true,
       minlength: 6,
     },
     role: {
       type: String,
-      enum: ["student", "supervisor_company", "supervisor_academic"],
+      enum: ["ETUDIANT", "ENCADRANT_ENTREPRISE", "ENCADRANT_UNIVERSITAIRE"],
       required: true,
     },
-    phone: {
-      type: String,
-      required: true,
-      match: [/^[0-9]{8,15}$/, "Invalid phone number"],
+    dateCreation: {
+      type: Date,
+      default: Date.now,
     },
   },
   {
@@ -39,14 +38,14 @@ const userSchema = new mongoose.Schema(
 
 // Hash password before saving
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-  this.password = await bcrypt.hash(this.password, 10);
+  if (!this.isModified("motDePasse")) return next();
+  this.motDePasse = await bcrypt.hash(this.motDePasse, 10);
   next();
 });
 
 // Method to compare password
 userSchema.methods.comparePassword = function (candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
+  return bcrypt.compare(candidatePassword, this.motDePasse);
 };
 
 module.exports = mongoose.model("User", userSchema);

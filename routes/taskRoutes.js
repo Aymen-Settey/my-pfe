@@ -13,17 +13,18 @@ const {
   validateTaskStatusUpdate,
   validateTaskId,
 } = require("../validators");
+const validationRoutes = require("./validationRoutes");
 
 // All routes require authentication
 router.use(protect);
 
 // Create task (only students can create tasks)
-router.post("/", authorizeRoles("student"), validateTask, createTask);
+router.post("/", authorizeRoles("ETUDIANT"), validateTask, createTask);
 
 // Update task status (only students can update task status)
 router.patch(
   "/:taskId/status",
-  authorizeRoles("student"),
+  authorizeRoles("ETUDIANT"),
   validateTaskId,
   validateTaskStatusUpdate,
   updateTaskStatus
@@ -32,7 +33,7 @@ router.patch(
 // Update task (only students can update tasks)
 router.put(
   "/:taskId",
-  authorizeRoles("student"),
+  authorizeRoles("ETUDIANT"),
   validateTaskId,
   validateTaskUpdate,
   updateTask
@@ -41,9 +42,12 @@ router.put(
 // Delete task (only students can delete tasks)
 router.delete(
   "/:taskId",
-  authorizeRoles("student"),
+  authorizeRoles("ETUDIANT"),
   validateTaskId,
   deleteTask
 );
+
+// Nested routes - validations for tasks
+router.use("/:taskId/validations", validationRoutes);
 
 module.exports = router;

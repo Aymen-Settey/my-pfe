@@ -7,13 +7,23 @@ const {
 } = require("../controllers/dashboardController");
 const { protect, authorizeRoles } = require("../middlewares/authMiddleware");
 
-router.get("/student", protect, authorizeRoles("student"), getStudentDashboard);
+router.get(
+  "/student",
+  protect,
+  authorizeRoles("ETUDIANT"),
+  getStudentDashboard
+);
 router.get(
   "/supervisor",
   protect,
-  authorizeRoles("supervisor_company", "supervisor_academic"),
+  authorizeRoles("ENCADRANT_ENTREPRISE", "ENCADRANT_UNIVERSITAIRE"),
   getSupervisorDashboard
 );
-router.get("/progress", protect, authorizeRoles("student"), getProjectProgress);
+router.get(
+  "/progress",
+  protect,
+  authorizeRoles("ETUDIANT"),
+  getProjectProgress
+);
 
 module.exports = router;

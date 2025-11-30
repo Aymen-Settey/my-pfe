@@ -3,31 +3,35 @@ const Project = require("../models/Project");
 exports.createProject = async (req, res, next) => {
   try {
     const {
-      title,
+      titre,
       description,
       academic_supervisor_id,
       company_supervisor_id,
-      start_date,
-      end_date,
+      dateDebut,
+      dateFin,
+      statut,
     } = req.body;
     const studentId = req.user.id;
 
-    // Check if student already has a project
-    const existingProject = await Project.findOne({ student_id: studentId });
-    if (existingProject) {
-      const err = new Error("Student already has a project");
+    // Check if student already has 2 projects (max 1-2 according to diagram)
+    const existingProjects = await Project.find({ student_id: studentId });
+    if (existingProjects.length >= 2) {
+      const err = new Error(
+        "Student already has maximum number of projects (2)"
+      );
       err.status = 400;
       throw err;
     }
 
     const project = new Project({
-      title,
+      titre,
       description,
       academic_supervisor_id,
       company_supervisor_id,
       student_id: studentId,
-      start_date,
-      end_date,
+      dateDebut,
+      dateFin,
+      statut: statut || "Actif",
     });
 
     await project.save();
@@ -78,10 +82,10 @@ exports.getProjectById = async (req, res, next) => {
 
 exports.updateProject = async (req, res, next) => {
   try {
-    const { title, description, start_date, end_date } = req.body;
+    const { titre, description, dateDebut, dateFin, statut } = req.body;
     const project = await Project.findByIdAndUpdate(
       req.params.id,
-      { title, description, start_date, end_date },
+      { titre, description, dateDebut, dateFin, statut },
       { new: true, runValidators: true }
     );
     if (!project) {

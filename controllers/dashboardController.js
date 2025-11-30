@@ -9,8 +9,11 @@ exports.getStudentDashboard = async (req, res, next) => {
   try {
     const { projectId } = req.params;
 
+    // const meetings = await Meeting.find({ project_id: projectId });
+    // Reports are now linked to meetings, not projects directly
     const meetings = await Meeting.find({ project_id: projectId });
-    const reports = await Report.find({ project_id: projectId });
+    const meetingIds = meetings.map((m) => m._id);
+    const reports = await Report.find({ meeting_id: { $in: meetingIds } });
     const journal = await Journal.find({ project_id: projectId });
     const tasks = await Task.find().populate({
       path: "userStory_id",
@@ -41,7 +44,7 @@ exports.getSupervisorDashboard = async (req, res, next) => {
   try {
     const { projectId } = req.params;
 
-    const tasks = await Task.find({ status: "done" }).populate({
+    const tasks = await Task.find({ statut: "Done" }).populate({
       path: "userStory_id",
       populate: {
         path: "sprint_id",
@@ -90,10 +93,10 @@ exports.getProjectProgress = async (req, res, next) => {
 
     const totalTasks = filteredTasks.length;
     const doneTasks = filteredTasks.filter(
-      (task) => task.status === "done"
+      (task) => task.statut === "Done"
     ).length;
     const standbyTasks = filteredTasks.filter(
-      (task) => task.status === "standby"
+      (task) => task.statut === "Standby"
     ).length;
 
     const progress =
@@ -125,7 +128,10 @@ exports.getProjectStatistics = async (req, res, next) => {
       await Promise.all([
         Sprint.find({ project_id: projectId }),
         Meeting.find({ project_id: projectId }),
-        Report.find({ project_id: projectId }),
+        Meeting.find({ project_id: projectId }).then((meetings) => {
+          const meetingIds = meetings.map((m) => m._id);
+          return Report.find({ meeting_id: { $in: meetingIds } });
+        }),
         Journal.find({ project_id: projectId }),
         Task.find().populate({
           path: "userStory_id",
@@ -141,29 +147,25 @@ exports.getProjectStatistics = async (req, res, next) => {
     // Calculate statistics
     const taskStats = {
       total: filteredTasks.length,
-      todo: filteredTasks.filter((task) => task.status === "todo").length,
-      inProgress: filteredTasks.filter((task) => task.status === "in_progress")
+      todo: filteredTasks.filter((task) => task.statut === "ToDo").length,
+      inProgress: filteredTasks.filter((task) => task.statut === "InProgress")
         .length,
-      standby: filteredTasks.filter((task) => task.status === "standby").length,
-      done: filteredTasks.filter((task) => task.status === "done").length,
+      standby: filteredTasks.filter((task) => task.statut === "Standby").length,
+      done: filteredTasks.filter((task) => task.statut === "Done").length,
     };
 
     const meetingStats = {
       total: meetings.length,
-      planned: meetings.filter((meeting) => meeting.status === "planned")
+      planifiee: meetings.filter((meeting) => meeting.statut === "Planifiee")
         .length,
-      completed: meetings.filter((meeting) => meeting.status === "completed")
+      effectuee: meetings.filter((meeting) => meeting.statut === "Effectuee")
         .length,
-      validated: meetings.filter((meeting) => meeting.validated).length,
+      annulee: meetings.filter((meeting) => meeting.statut === "Annulee")
+        .length,
     };
 
     const reportStats = {
       total: reports.length,
-      draft: reports.filter((report) => report.status === "draft").length,
-      submitted: reports.filter((report) => report.status === "submitted")
-        .length,
-      approved: reports.filter((report) => report.status === "approved").length,
-      rejected: reports.filter((report) => report.status === "rejected").length,
     };
 
     res.status(200).json({

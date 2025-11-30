@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 
 const projectSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true },
+    titre: { type: String, required: true },
     description: String,
     academic_supervisor_id: {
       type: mongoose.Schema.Types.ObjectId,
@@ -20,8 +20,13 @@ const projectSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    start_date: { type: Date, required: true },
-    end_date: { type: Date, required: true },
+    dateDebut: { type: Date, required: true },
+    dateFin: { type: Date, required: true },
+    statut: {
+      type: String,
+      enum: ["Actif", "Terminee", "Suspendu"],
+      default: "Actif",
+    },
   },
   {
     timestamps: true,

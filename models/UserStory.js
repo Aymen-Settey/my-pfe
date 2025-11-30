@@ -8,10 +8,14 @@ const userStorySchema = new mongoose.Schema(
       ref: "Sprint",
       required: true,
     },
-    title: { type: String, required: true },
+    titre: { type: String, required: true },
     description: String,
-    start_date: { type: Date, required: true },
-    end_date: { type: Date, required: true },
+    priorite: {
+      type: String,
+      enum: ["Haute", "Moyenne", "Basse"],
+      default: "Moyenne",
+    },
+    acceptation: String,
   },
   {
     timestamps: true,

@@ -2,15 +2,15 @@ const UserStory = require("../models/UserStory");
 
 exports.createUserStory = async (req, res, next) => {
   try {
-    const { title, description, start_date, end_date } = req.body;
+    const { titre, description, priorite, acceptation } = req.body;
     const { sprintId } = req.params;
 
     const userStory = new UserStory({
       sprint_id: sprintId,
-      title,
+      titre,
       description,
-      start_date,
-      end_date,
+      priorite: priorite || "Moyenne",
+      acceptation,
     });
 
     await userStory.save();
@@ -63,11 +63,11 @@ exports.getUserStoryById = async (req, res, next) => {
 exports.updateUserStory = async (req, res, next) => {
   try {
     const { sprintId, userStoryId } = req.params;
-    const { title, description, start_date, end_date } = req.body;
+    const { titre, description, priorite, acceptation } = req.body;
 
     const story = await UserStory.findOneAndUpdate(
       { _id: userStoryId, sprint_id: sprintId },
-      { title, description, start_date, end_date },
+      { titre, description, priorite, acceptation },
       { new: true, runValidators: true }
     );
 

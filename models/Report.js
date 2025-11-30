@@ -1,24 +1,19 @@
-// models/Report.js
+// models/Report.js (VersionRapport)
 const mongoose = require("mongoose");
 
 const reportSchema = new mongoose.Schema(
   {
-    project_id: {
+    meeting_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Project",
+      ref: "Meeting",
       required: true,
     },
-    version: { type: String, required: true },
-    date: { type: Date, required: true },
-    notes: String,
-    file_url: { type: String, required: true },
-    status: {
-      type: String,
-      enum: ["draft", "submitted", "approved", "rejected"],
-      default: "draft",
+    urlFichier: { type: String, required: true },
+    version: { type: Number, required: true },
+    dateCreation: {
+      type: Date,
+      default: Date.now,
     },
-    submitted_by: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    reviewed_by: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   {
     timestamps: true,

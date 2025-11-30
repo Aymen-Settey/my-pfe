@@ -2,14 +2,14 @@ const Task = require("../models/Task");
 
 exports.createTask = async (req, res, next) => {
   try {
-    const { title, description, priority } = req.body;
+    const { titre, description, statut } = req.body;
     const { userStoryId } = req.params;
 
     const task = new Task({
       userStory_id: userStoryId,
-      title,
+      titre,
       description,
-      priority,
+      statut: statut || "ToDo",
     });
 
     await task.save();
@@ -26,7 +26,7 @@ exports.createTask = async (req, res, next) => {
 exports.updateTaskStatus = async (req, res, next) => {
   try {
     const { taskId } = req.params;
-    const { status } = req.body;
+    const { statut } = req.body;
 
     const task = await Task.findById(taskId);
     if (!task) {
@@ -35,10 +35,20 @@ exports.updateTaskStatus = async (req, res, next) => {
       throw err;
     }
 
-    task.status = status;
-    task.history.push({ status, changedAt: new Date() });
+    const ancienStatut = task.statut;
+    task.statut = statut;
+    task.dateModification = new Date();
 
-    await task.save();
+    // Create history entry
+    const HistoriqueTache = require("../models/HistoriqueTache");
+    const historique = new HistoriqueTache({
+      tache_id: taskId,
+      ancienStatut,
+      nouveauStatut: statut,
+      auteur: req.user.nom || req.user.email,
+    });
+
+    await Promise.all([task.save(), historique.save()]);
     res.status(200).json({
       success: true,
       message: "Task status updated successfully",
@@ -74,24 +84,37 @@ exports.getProjectTasks = async (req, res, next) => {
 exports.updateTask = async (req, res, next) => {
   try {
     const { taskId } = req.params;
-    const { title, description, priority, status } = req.body;
+    const { titre, description, statut } = req.body;
 
-    const task = await Task.findByIdAndUpdate(
-      taskId,
-      { title, description, priority, status },
-      { new: true, runValidators: true }
-    );
-
+    const task = await Task.findById(taskId);
     if (!task) {
       const err = new Error("Task not found");
       err.status = 404;
       throw err;
     }
 
+    // Track status change if statut is being updated
+    if (statut && statut !== task.statut) {
+      const HistoriqueTache = require("../models/HistoriqueTache");
+      const historique = new HistoriqueTache({
+        tache_id: taskId,
+        ancienStatut: task.statut,
+        nouveauStatut: statut,
+        auteur: req.user.nom || req.user.email,
+      });
+      await historique.save();
+    }
+
+    const updatedTask = await Task.findByIdAndUpdate(
+      taskId,
+      { titre, description, statut, dateModification: new Date() },
+      { new: true, runValidators: true }
+    );
+
     res.status(200).json({
       success: true,
       message: "Task updated successfully",
-      model: task,
+      model: updatedTask,
     });
   } catch (err) {
     next(err);

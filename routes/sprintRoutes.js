@@ -18,37 +18,27 @@ const {
 router.use(protect);
 
 // Create sprint (only students can create sprints)
-router.post("/", authorizeRoles("student"), validateSprint, createSprint);
+router.post("/", authorizeRoles("ETUDIANT"), validateSprint, createSprint);
 
-// Get all sprints (accessible by students, supervisors, and admins)
+// Get all sprints (accessible by students, supervisors)
 router.get(
   "/",
-  authorizeRoles(
-    "student",
-    "academic_supervisor",
-    "company_supervisor",
-    "admin"
-  ),
+  authorizeRoles("ETUDIANT", "ENCADRANT_UNIVERSITAIRE", "ENCADRANT_ENTREPRISE"),
   getSprints
 );
 
-// Get sprint by ID (accessible by students, supervisors, and admins)
+// Get sprint by ID (accessible by students, supervisors)
 router.get(
   "/:sprintId",
   validateSprintId,
-  authorizeRoles(
-    "student",
-    "academic_supervisor",
-    "company_supervisor",
-    "admin"
-  ),
+  authorizeRoles("ETUDIANT", "ENCADRANT_UNIVERSITAIRE", "ENCADRANT_ENTREPRISE"),
   getSprintById
 );
 
 // Update sprint (only students can update sprints)
 router.put(
   "/:sprintId",
-  authorizeRoles("student"),
+  authorizeRoles("ETUDIANT"),
   validateSprintId,
   validateSprintUpdate,
   updateSprint

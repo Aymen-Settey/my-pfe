@@ -3,28 +3,27 @@ const { z } = require("zod");
 // User validation schemas
 const userSchema = z.object({
   email: z.string().email({ message: "Email invalide" }),
-  password: z
+  motDePasse: z
     .string()
     .min(6, { message: "Le mot de passe doit contenir au moins 6 caractères" }),
-  user_name: z.string().min(1, { message: "Le nom d'utilisateur est requis" }),
+  nom: z.string().min(1, { message: "Le nom est requis" }),
   role: z.enum(
-    ["student", "academic_supervisor", "company_supervisor", "admin"],
+    ["ETUDIANT", "ENCADRANT_ENTREPRISE", "ENCADRANT_UNIVERSITAIRE"],
     {
       message:
-        "Le rôle doit être: student, academic_supervisor, company_supervisor ou admin",
+        "Le rôle doit être: ETUDIANT, ENCADRANT_ENTREPRISE ou ENCADRANT_UNIVERSITAIRE",
     }
   ),
-  phone: z.string().optional(),
 });
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Email invalide" }),
-  password: z.string().min(1, { message: "Le mot de passe est requis" }),
+  motDePasse: z.string().min(1, { message: "Le mot de passe est requis" }),
 });
 
 // Project validation schemas
 const projectSchema = z.object({
-  title: z.string().min(1, { message: "Le titre est requis" }),
+  titre: z.string().min(1, { message: "Le titre est requis" }),
   description: z.string().min(1, { message: "La description est requise" }),
   academic_supervisor_id: z.string().regex(/^[0-9a-fA-F]{24}$/, {
     message: "ID du superviseur académique invalide",
@@ -32,106 +31,111 @@ const projectSchema = z.object({
   company_supervisor_id: z.string().regex(/^[0-9a-fA-F]{24}$/, {
     message: "ID du superviseur d'entreprise invalide",
   }),
-  start_date: z.string().datetime({ message: "Date de début invalide" }),
-  end_date: z.string().datetime({ message: "Date de fin invalide" }),
+  dateDebut: z.string().datetime({ message: "Date de début invalide" }),
+  dateFin: z.string().datetime({ message: "Date de fin invalide" }),
+  statut: z
+    .enum(["Actif", "Terminee", "Suspendu"], {
+      message: "Le statut doit être: Actif, Terminee ou Suspendu",
+    })
+    .optional(),
 });
 
 const projectUpdateSchema = z.object({
-  title: z.string().min(1, { message: "Le titre est requis" }).optional(),
+  titre: z.string().min(1, { message: "Le titre est requis" }).optional(),
   description: z
     .string()
     .min(1, { message: "La description est requise" })
     .optional(),
-  start_date: z
+  dateDebut: z
     .string()
     .datetime({ message: "Date de début invalide" })
     .optional(),
-  end_date: z.string().datetime({ message: "Date de fin invalide" }).optional(),
+  dateFin: z.string().datetime({ message: "Date de fin invalide" }).optional(),
+  statut: z
+    .enum(["Actif", "Terminee", "Suspendu"], {
+      message: "Le statut doit être: Actif, Terminee ou Suspendu",
+    })
+    .optional(),
 });
 
 // Sprint validation schemas
 const sprintSchema = z.object({
-  name: z.string().min(1, { message: "Le nom du sprint est requis" }),
-  goal: z.string().optional(),
-  start_date: z.string().datetime({ message: "Date de début invalide" }),
-  end_date: z.string().datetime({ message: "Date de fin invalide" }),
-  status: z
-    .enum(["planning", "active", "completed"], {
-      message: "Le statut doit être: planning, active ou completed",
+  numero: z
+    .number()
+    .int()
+    .positive({ message: "Le numéro du sprint est requis" }),
+  nom: z.string().min(1, { message: "Le nom du sprint est requis" }),
+  dateDebut: z.string().datetime({ message: "Date de début invalide" }),
+  dateFin: z.string().datetime({ message: "Date de fin invalide" }),
+  statut: z
+    .enum(["Planifie", "EnCours", "Termine"], {
+      message: "Le statut doit être: Planifie, EnCours ou Termine",
     })
     .optional(),
 });
 
 const sprintUpdateSchema = z.object({
-  name: z
-    .string()
-    .min(1, { message: "Le nom du sprint est requis" })
-    .optional(),
-  goal: z.string().optional(),
-  start_date: z
+  numero: z.number().int().positive().optional(),
+  nom: z.string().min(1, { message: "Le nom du sprint est requis" }).optional(),
+  dateDebut: z
     .string()
     .datetime({ message: "Date de début invalide" })
     .optional(),
-  end_date: z.string().datetime({ message: "Date de fin invalide" }).optional(),
-  status: z
-    .enum(["planning", "active", "completed"], {
-      message: "Le statut doit être: planning, active ou completed",
+  dateFin: z.string().datetime({ message: "Date de fin invalide" }).optional(),
+  statut: z
+    .enum(["Planifie", "EnCours", "Termine"], {
+      message: "Le statut doit être: Planifie, EnCours ou Termine",
     })
     .optional(),
 });
 
 // User Story validation schemas
 const userStorySchema = z.object({
-  title: z.string().min(1, { message: "Le titre est requis" }),
+  titre: z.string().min(1, { message: "Le titre est requis" }),
   description: z.string().optional(),
-  start_date: z.string().datetime({ message: "Date de début invalide" }),
-  end_date: z.string().datetime({ message: "Date de fin invalide" }),
+  priorite: z
+    .enum(["Haute", "Moyenne", "Basse"], {
+      message: "La priorité doit être: Haute, Moyenne ou Basse",
+    })
+    .optional(),
+  acceptation: z.string().optional(),
 });
 
 const userStoryUpdateSchema = z.object({
-  title: z.string().min(1, { message: "Le titre est requis" }).optional(),
+  titre: z.string().min(1, { message: "Le titre est requis" }).optional(),
   description: z.string().optional(),
-  start_date: z
-    .string()
-    .datetime({ message: "Date de début invalide" })
+  priorite: z
+    .enum(["Haute", "Moyenne", "Basse"], {
+      message: "La priorité doit être: Haute, Moyenne ou Basse",
+    })
     .optional(),
-  end_date: z.string().datetime({ message: "Date de fin invalide" }).optional(),
+  acceptation: z.string().optional(),
 });
 
 // Task validation schemas
 const taskSchema = z.object({
-  title: z.string().min(1, { message: "Le titre est requis" }),
+  titre: z.string().min(1, { message: "Le titre est requis" }),
   description: z.string().optional(),
-  priority: z
-    .enum(["low", "medium", "high"], {
-      message: "La priorité doit être: low, medium ou high",
-    })
-    .optional(),
-  status: z
-    .enum(["todo", "in_progress", "standby", "done"], {
-      message: "Le statut doit être: todo, in_progress, standby ou done",
+  statut: z
+    .enum(["ToDo", "InProgress", "Standby", "Done"], {
+      message: "Le statut doit être: ToDo, InProgress, Standby ou Done",
     })
     .optional(),
 });
 
 const taskUpdateSchema = z.object({
-  title: z.string().min(1, { message: "Le titre est requis" }).optional(),
+  titre: z.string().min(1, { message: "Le titre est requis" }).optional(),
   description: z.string().optional(),
-  priority: z
-    .enum(["low", "medium", "high"], {
-      message: "La priorité doit être: low, medium ou high",
-    })
-    .optional(),
-  status: z
-    .enum(["todo", "in_progress", "standby", "done"], {
-      message: "Le statut doit être: todo, in_progress, standby ou done",
+  statut: z
+    .enum(["ToDo", "InProgress", "Standby", "Done"], {
+      message: "Le statut doit être: ToDo, InProgress, Standby ou Done",
     })
     .optional(),
 });
 
 const taskStatusUpdateSchema = z.object({
-  status: z.enum(["todo", "in_progress", "standby", "done"], {
-    message: "Le statut doit être: todo, in_progress, standby ou done",
+  statut: z.enum(["ToDo", "InProgress", "Standby", "Done"], {
+    message: "Le statut doit être: ToDo, InProgress, Standby ou Done",
   }),
 });
 
@@ -179,80 +183,44 @@ const journalUpdateSchema = z.object({
 
 // Meeting validation schemas
 const meetingSchema = z.object({
-  title: z.string().min(1, { message: "Le titre est requis" }),
-  date: z.string().datetime({ message: "Date invalide" }),
-  duration: z
-    .number()
-    .min(1, { message: "La durée doit être positive" })
-    .optional(),
-  participants: z
-    .array(
-      z
-        .string()
-        .regex(/^[0-9a-fA-F]{24}$/, { message: "ID de participant invalide" })
-    )
-    .optional(),
-  link: z.string().url({ message: "Lien invalide" }).optional(),
-  status: z
-    .enum(["planned", "completed"], {
-      message: "Le statut doit être: planned ou completed",
+  datePlanification: z.string().datetime({ message: "Date invalide" }),
+  ordreDuJour: z.string().optional(),
+  compteRendu: z.string().optional(),
+  statut: z
+    .enum(["Planifiee", "Effectuee", "Annulee"], {
+      message: "Le statut doit être: Planifiee, Effectuee ou Annulee",
     })
     .optional(),
-  description: z.string().optional(),
 });
 
 const meetingUpdateSchema = z.object({
-  title: z.string().min(1, { message: "Le titre est requis" }).optional(),
-  date: z.string().datetime({ message: "Date invalide" }).optional(),
-  duration: z
-    .number()
-    .min(1, { message: "La durée doit être positive" })
+  datePlanification: z
+    .string()
+    .datetime({ message: "Date invalide" })
     .optional(),
-  participants: z
-    .array(
-      z
-        .string()
-        .regex(/^[0-9a-fA-F]{24}$/, { message: "ID de participant invalide" })
-    )
-    .optional(),
-  link: z.string().url({ message: "Lien invalide" }).optional(),
-  status: z
-    .enum(["planned", "completed"], {
-      message: "Le statut doit être: planned ou completed",
+  ordreDuJour: z.string().optional(),
+  compteRendu: z.string().optional(),
+  statut: z
+    .enum(["Planifiee", "Effectuee", "Annulee"], {
+      message: "Le statut doit être: Planifiee, Effectuee ou Annulee",
     })
     .optional(),
-  description: z.string().optional(),
 });
 
 const meetingValidationSchema = z.object({
-  status: z.enum(["planned", "completed"], {
-    message: "Le statut doit être: planned ou completed",
-  }),
+  estValide: z.boolean({ message: "estValide doit être un booléen" }),
+  commentaire: z.string().optional(),
 });
 
-// Report validation schemas
+// Report validation schemas (VersionRapport)
 const reportSchema = z.object({
-  version: z.string().min(1, { message: "La version est requise" }),
-  date: z.string().datetime({ message: "Date invalide" }),
-  notes: z.string().optional(),
-  file_url: z.string().url({ message: "URL de fichier invalide" }),
-  status: z
-    .enum(["draft", "submitted", "approved", "rejected"], {
-      message: "Le statut doit être: draft, submitted, approved ou rejected",
-    })
-    .optional(),
+  urlFichier: z.string().url({ message: "URL de fichier invalide" }),
+  version: z.number().int().positive({ message: "La version est requise" }),
 });
 
 const reportUpdateSchema = z.object({
-  version: z.string().min(1, { message: "La version est requise" }).optional(),
-  date: z.string().datetime({ message: "Date invalide" }).optional(),
-  notes: z.string().optional(),
-  file_url: z.string().url({ message: "URL de fichier invalide" }).optional(),
-  status: z
-    .enum(["draft", "submitted", "approved", "rejected"], {
-      message: "Le statut doit être: draft, submitted, approved ou rejected",
-    })
-    .optional(),
+  urlFichier: z.string().url({ message: "URL de fichier invalide" }).optional(),
+  version: z.number().int().positive().optional(),
 });
 
 // Additional ID validation schemas
@@ -266,6 +234,44 @@ const reportIdSchema = z.object({
   reportId: z
     .string()
     .regex(/^[0-9a-fA-F]{24}$/, { message: "Format d'ID de rapport invalide" }),
+});
+
+// Validation schemas
+const validationSchema = z
+  .object({
+    taskId: z
+      .string()
+      .regex(/^[0-9a-fA-F]{24}$/, { message: "Format d'ID de tâche invalide" })
+      .optional(),
+    meetingId: z
+      .string()
+      .regex(/^[0-9a-fA-F]{24}$/, {
+        message: "Format d'ID de réunion invalide",
+      })
+      .optional(),
+    estValide: z.boolean({ message: "estValide doit être un booléen" }),
+    commentaire: z.string().optional(),
+  })
+  .refine(
+    (data) =>
+      (data.taskId && !data.meetingId) || (!data.taskId && data.meetingId),
+    {
+      message:
+        "Soit taskId soit meetingId doit être fourni (contrainte OU exclusif)",
+    }
+  );
+
+const validationUpdateSchema = z.object({
+  estValide: z
+    .boolean({ message: "estValide doit être un booléen" })
+    .optional(),
+  commentaire: z.string().optional(),
+});
+
+const validationIdSchema = z.object({
+  validationId: z.string().regex(/^[0-9a-fA-F]{24}$/, {
+    message: "Format d'ID de validation invalide",
+  }),
 });
 
 // Validation middleware functions
@@ -659,6 +665,55 @@ const validateReportId = (req, res, next) => {
   }
 };
 
+const validateValidation = (req, res, next) => {
+  try {
+    validationSchema.parse(req.body);
+    next();
+  } catch (error) {
+    const err = new Error("Validation failed");
+    err.status = 400;
+    err.details = error.errors.map((e) => ({
+      field: e.path.join("."),
+      message: e.message,
+      code: "VALIDATION_ERROR",
+    }));
+    next(err);
+  }
+};
+
+const validateValidationUpdate = (req, res, next) => {
+  try {
+    validationUpdateSchema.parse(req.body);
+    next();
+  } catch (error) {
+    const err = new Error("Validation failed");
+    err.status = 400;
+    err.details = error.errors.map((e) => ({
+      field: e.path.join("."),
+      message: e.message,
+      code: "VALIDATION_ERROR",
+    }));
+    next(err);
+  }
+};
+
+const validateValidationId = (req, res, next) => {
+  try {
+    validationIdSchema.parse({ validationId: req.params.validationId });
+    next();
+  } catch (error) {
+    const err = new Error("Invalid Validation ID format");
+    err.status = 400;
+    err.details = {
+      field: "validationId",
+      value: req.params.validationId,
+      message: error.errors[0]?.message || "Format d'ID de validation invalide",
+      code: "INVALID_VALIDATION_ID",
+    };
+    next(err);
+  }
+};
+
 module.exports = {
   validateUser,
   validateLogin,
@@ -678,10 +733,13 @@ module.exports = {
   validateMeetingValidation,
   validateReport,
   validateReportUpdate,
+  validateValidation,
+  validateValidationUpdate,
   validateId,
   validateSprintId,
   validateUserStoryId,
   validateTaskId,
   validateMeetingId,
   validateReportId,
+  validateValidationId,
 };

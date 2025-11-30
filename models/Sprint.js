@@ -8,14 +8,14 @@ const sprintSchema = new mongoose.Schema(
       ref: "Project",
       required: true,
     },
-    name: { type: String, required: true },
-    goal: String,
-    start_date: { type: Date, required: true },
-    end_date: { type: Date, required: true },
-    status: {
+    numero: { type: Number, required: true },
+    nom: { type: String, required: true },
+    dateDebut: { type: Date, required: true },
+    dateFin: { type: Date, required: true },
+    statut: {
       type: String,
-      enum: ["planning", "active", "completed"],
-      default: "planning",
+      enum: ["Planifie", "EnCours", "Termine"],
+      default: "Planifie",
     },
   },
   {

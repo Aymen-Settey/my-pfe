@@ -19,51 +19,54 @@ const meetingRoutes = require("./meetingRoutes");
 const reportRoutes = require("./reportRoutes");
 const journalRoutes = require("./journalRoutes");
 const dashboardRoutes = require("./dashboardRoutes");
+const validationRoutes = require("./validationRoutes");
 
 // All routes require authentication
 router.use(protect);
 
 // Create project (only students can create projects)
-router.post("/", authorizeRoles("student"), validateProject, createProject);
+router.post("/", authorizeRoles("ETUDIANT"), validateProject, createProject);
 
-// Get all projects (accessible by supervisors and admins)
+// Get all projects (accessible by supervisors)
 router.get(
   "/",
-  authorizeRoles("academic_supervisor", "company_supervisor", "admin"),
+  authorizeRoles("ENCADRANT_UNIVERSITAIRE", "ENCADRANT_ENTREPRISE"),
   getProjects
 );
 
-// Get project by ID (accessible by students, supervisors, and admins)
+// Get project by ID (accessible by students, supervisors)
 router.get(
   "/:id",
   validateId,
-  authorizeRoles(
-    "student",
-    "academic_supervisor",
-    "company_supervisor",
-    "admin"
-  ),
+  authorizeRoles("ETUDIANT", "ENCADRANT_UNIVERSITAIRE", "ENCADRANT_ENTREPRISE"),
   getProjectById
 );
 
 // Update project (only students can update their own projects)
 router.put(
   "/:id",
-  authorizeRoles("student"),
+  authorizeRoles("ETUDIANT"),
   validateId,
   validateProjectUpdate,
   updateProject
 );
 
-// Delete project (only admins can delete projects)
-router.delete("/:id", authorizeRoles("admin"), validateId, deleteProject);
+// Delete project (only supervisors can delete projects)
+router.delete(
+  "/:id",
+  authorizeRoles("ENCADRANT_UNIVERSITAIRE", "ENCADRANT_ENTREPRISE"),
+  validateId,
+  deleteProject
+);
 
 // Nested routes
 router.use("/:projectId/sprints", sprintRoutes);
 router.use("/:projectId/tasks", projectTaskRoutes);
 router.use("/:projectId/meetings", meetingRoutes);
-router.use("/:projectId/reports", reportRoutes);
+// Reports are now nested under meetings, not projects
 router.use("/:projectId/internship-journal", journalRoutes);
 router.use("/:projectId/dashboard", dashboardRoutes);
+// General validations route (can filter by taskId or meetingId query params)
+router.use("/:projectId/validations", validationRoutes);
 
 module.exports = router;

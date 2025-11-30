@@ -8,28 +8,33 @@ const taskSchema = new mongoose.Schema(
       ref: "UserStory",
       required: true,
     },
-    title: { type: String, required: true },
+    titre: { type: String, required: true },
     description: String,
-    priority: {
+    statut: {
       type: String,
-      enum: ["low", "medium", "high"],
-      default: "medium",
+      enum: ["ToDo", "InProgress", "Standby", "Done"],
+      default: "ToDo",
     },
-    status: {
-      type: String,
-      enum: ["todo", "in_progress", "standby", "done"],
-      default: "todo",
+    dateCreation: {
+      type: Date,
+      default: Date.now,
     },
-    history: [
-      {
-        status: String,
-        changedAt: Date,
-      },
-    ],
+    dateModification: {
+      type: Date,
+      default: Date.now,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+// Update dateModification on save
+taskSchema.pre("save", function (next) {
+  if (this.isModified() && !this.isNew) {
+    this.dateModification = new Date();
+  }
+  next();
+});
 
 module.exports = mongoose.model("Task", taskSchema);

@@ -2,15 +2,16 @@ const Sprint = require("../models/Sprint");
 
 exports.createSprint = async (req, res, next) => {
   try {
-    const { name, goal, start_date, end_date } = req.body;
+    const { numero, nom, dateDebut, dateFin, statut } = req.body;
     const { projectId } = req.params;
 
     const sprint = new Sprint({
       project_id: projectId,
-      name,
-      goal,
-      start_date,
-      end_date,
+      numero,
+      nom,
+      dateDebut,
+      dateFin,
+      statut: statut || "Planifie",
     });
 
     await sprint.save();
@@ -63,11 +64,11 @@ exports.getSprintById = async (req, res, next) => {
 exports.updateSprint = async (req, res, next) => {
   try {
     const { projectId, sprintId } = req.params;
-    const { name, goal, start_date, end_date, status } = req.body;
+    const { numero, nom, dateDebut, dateFin, statut } = req.body;
 
     const sprint = await Sprint.findOneAndUpdate(
       { _id: sprintId, project_id: projectId },
-      { name, goal, start_date, end_date, status },
+      { numero, nom, dateDebut, dateFin, statut },
       { new: true, runValidators: true }
     );
 

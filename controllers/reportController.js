@@ -2,23 +2,19 @@ const Report = require("../models/Report");
 
 exports.uploadReport = async (req, res, next) => {
   try {
-    const { version, date, notes, file_url, status } = req.body;
-    const { projectId } = req.params;
+    const { urlFichier, version } = req.body;
+    const { meetingId } = req.params;
 
     const report = new Report({
-      project_id: projectId,
+      meeting_id: meetingId,
+      urlFichier,
       version,
-      date,
-      notes,
-      file_url,
-      status,
-      submitted_by: req.user.id,
     });
 
     await report.save();
     res.status(201).json({
       success: true,
-      message: "Report uploaded successfully",
+      message: "Report version uploaded successfully",
       model: report,
     });
   } catch (err) {
@@ -28,18 +24,18 @@ exports.uploadReport = async (req, res, next) => {
 
 exports.getReports = async (req, res, next) => {
   try {
-    const { projectId } = req.params;
-    const reports = await Report.find({ project_id: projectId });
+    const { meetingId } = req.params;
+    const reports = await Report.find({ meeting_id: meetingId });
 
     if (reports.length === 0) {
-      const err = new Error("No reports found");
+      const err = new Error("No report versions found");
       err.status = 404;
       throw err;
     }
 
     res.status(200).json({
       success: true,
-      message: "Reports fetched successfully",
+      message: "Report versions fetched successfully",
       model: reports,
     });
   } catch (err) {
@@ -49,21 +45,21 @@ exports.getReports = async (req, res, next) => {
 
 exports.getReportById = async (req, res, next) => {
   try {
-    const { projectId, reportId } = req.params;
+    const { meetingId, reportId } = req.params;
     const report = await Report.findOne({
       _id: reportId,
-      project_id: projectId,
+      meeting_id: meetingId,
     });
 
     if (!report) {
-      const err = new Error("Report not found");
+      const err = new Error("Report version not found");
       err.status = 404;
       throw err;
     }
 
     res.status(200).json({
       success: true,
-      message: "Report fetched successfully",
+      message: "Report version fetched successfully",
       model: report,
     });
   } catch (err) {
@@ -73,24 +69,24 @@ exports.getReportById = async (req, res, next) => {
 
 exports.updateReport = async (req, res, next) => {
   try {
-    const { projectId, reportId } = req.params;
-    const { version, date, notes, file_url, status } = req.body;
+    const { meetingId, reportId } = req.params;
+    const { urlFichier, version } = req.body;
 
     const report = await Report.findOneAndUpdate(
-      { _id: reportId, project_id: projectId },
-      { version, date, notes, file_url, status },
+      { _id: reportId, meeting_id: meetingId },
+      { urlFichier, version },
       { new: true, runValidators: true }
     );
 
     if (!report) {
-      const err = new Error("Report not found");
+      const err = new Error("Report version not found");
       err.status = 404;
       throw err;
     }
 
     res.status(200).json({
       success: true,
-      message: "Report updated successfully",
+      message: "Report version updated successfully",
       model: report,
     });
   } catch (err) {
@@ -100,23 +96,23 @@ exports.updateReport = async (req, res, next) => {
 
 exports.downloadReport = async (req, res, next) => {
   try {
-    const { projectId, reportId } = req.params;
+    const { meetingId, reportId } = req.params;
     const report = await Report.findOne({
       _id: reportId,
-      project_id: projectId,
+      meeting_id: meetingId,
     });
 
     if (!report) {
-      const err = new Error("Report not found");
+      const err = new Error("Report version not found");
       err.status = 404;
       throw err;
     }
 
-    // For now, we assume file_url is a direct link or path
+    // For now, we assume urlFichier is a direct link or path
     res.status(200).json({
       success: true,
       message: "Download URL retrieved successfully",
-      model: { download_url: report.file_url },
+      model: { download_url: report.urlFichier },
     });
   } catch (err) {
     next(err);
@@ -125,29 +121,35 @@ exports.downloadReport = async (req, res, next) => {
 
 exports.reviewReport = async (req, res, next) => {
   try {
-    const { projectId, reportId } = req.params;
-    const { status, notes } = req.body;
+    const { meetingId, reportId } = req.params;
+    const { estValide, commentaire } = req.body;
 
     const report = await Report.findOne({
       _id: reportId,
-      project_id: projectId,
+      meeting_id: meetingId,
     });
 
     if (!report) {
-      const err = new Error("Report not found");
+      const err = new Error("Report version not found");
       err.status = 404;
       throw err;
     }
 
-    report.status = status;
-    report.notes = notes || report.notes;
-    report.reviewed_by = req.user.id;
+    // Create validation for report (which is linked to meeting)
+    const Validation = require("../models/Validation");
+    const validation = new Validation({
+      meeting_id: meetingId,
+      validated_by: req.user.id,
+      estValide,
+      commentaire,
+      typeValidation: "ContenuReunion",
+    });
 
-    await report.save();
+    await validation.save();
     res.status(200).json({
       success: true,
       message: "Report reviewed successfully",
-      model: report,
+      model: validation,
     });
   } catch (err) {
     next(err);
@@ -156,21 +158,21 @@ exports.reviewReport = async (req, res, next) => {
 
 exports.deleteReport = async (req, res, next) => {
   try {
-    const { projectId, reportId } = req.params;
+    const { meetingId, reportId } = req.params;
     const result = await Report.deleteOne({
       _id: reportId,
-      project_id: projectId,
+      meeting_id: meetingId,
     });
 
     if (result.deletedCount === 0) {
-      const err = new Error("Report not found");
+      const err = new Error("Report version not found");
       err.status = 404;
       throw err;
     }
 
     res.status(200).json({
       success: true,
-      message: "Report deleted successfully",
+      message: "Report version deleted successfully",
     });
   } catch (err) {
     next(err);

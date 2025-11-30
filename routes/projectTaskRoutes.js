@@ -6,7 +6,7 @@ const { protect, authorizeRoles } = require("../middlewares/authMiddleware");
 router.get(
   "/",
   protect,
-  authorizeRoles("student", "supervisor_company", "supervisor_academic"),
+  authorizeRoles("ETUDIANT", "ENCADRANT_ENTREPRISE", "ENCADRANT_UNIVERSITAIRE"),
   getProjectTasks
 );
 
